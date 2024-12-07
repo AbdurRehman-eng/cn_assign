@@ -15,4 +15,4 @@ def sendFile ( file_path, host = '0.0.0.0', port = 5000 ):
     print("File sent successfully.")
     con.close()
 
-sendFile("/video/new.tif")
+sendFile("D:\\Projects\\cn_assign\\video\\new.tif")
