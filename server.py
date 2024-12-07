@@ -19,22 +19,14 @@ def sendFile ( file_path, host = '0.0.0.0', port = 5000 ):
     fileSize = os.path.getsize(file_path)
     fragSize = 1024
 
-    metadata = {
-        'fileSize' : fileSize,
-        'fragSize' : fragSize
-    }
-
-    jsonMeta = json.dumps(metadata)
-
     with open(file_path, "rb") as file:
         con.sendall(fileExten.encode())
-        con.sendall(str(fragSize).encode())
-        con.sendall(jsonMeta.encode())
+        con.sendall(fragSize.to_bytes(1024, byteorder='big'))
         print("metadata sent")
         while fragment := file.read(fragSize):
-            print(f"Sending fragment {fragCount}")
+            print(f"Sending fragment {fragCount}", end="\r")
             con.sendall(fragment)
-            # con.sendall(str(fragCount).encode())
+            con.sendall(fragCount.to_bytes(1024, byteorder='big'))
             fragCount += 1
 
     print("File sent successfully.")
