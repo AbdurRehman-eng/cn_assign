@@ -1,4 +1,5 @@
 import socket
+import json
 
 def recvFile ( fileName, host = "127.0.0.1", port = 5000):
     
@@ -6,13 +7,26 @@ def recvFile ( fileName, host = "127.0.0.1", port = 5000):
     s.connect((host, port))
 
     print("connection successful!.")
-    fileExten = s.recv(1024).decode()
 
+    fileExten = s.recv(1024).decode()
+    fragSize = s.recv(1024).decode()
+    # fileSize = int(s.recv(1024).decode())
+    metadata_size = int(s.recv(4).decode())
+    metadata = b''
+    while len(metadata) < metadata_size:
+        metadata += s.recv(1024)
+    metadata = json.loads(metadata.decode())  # Now decode the complete metadata
+    fileSize = metadata['fileSize']
+
+
+    print("metadata received")
     file_name = fileName + fileExten
 
     with open(file_name, "wb") as file:
         while True:
-            frag = s.recv(1024)
+            frag = s.recv((int(fragSize)))
+            # fragCount = int(s.recv(1024).decode())
+            # print(f"Received fragment No. {fragCount}")
             if not frag:
                 break
             file.write(frag)
@@ -20,5 +34,4 @@ def recvFile ( fileName, host = "127.0.0.1", port = 5000):
     print(f"File received and saved as {file_name}")
     s.close()
 
-fileName = input("Enter the name of the file(without extension): ")
-recvFile(fileName)
+recvFile(input("Enter the name of the file(without extension): "))
